@@ -30,7 +30,7 @@
   - name: Check DB connections
     community.mysql.mysql_info: 
       login_user: root
-      login_passport: "{{ mysql_root_password }}"
+      login_passpword: "{{ mysql_root_password }}"
       login_host: "{{ login_host }}"
       filter: version
     ignore_errors: yes
