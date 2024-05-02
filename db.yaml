@@ -3,6 +3,10 @@
   become: yes
   vars:
     login_host: database.akshaydaws-78s.online
+  vars_prompt:
+  - name: mysql_root_password
+    prompt: please enter the password
+    private: no
   tasks: 
   - name: Install Mysql Server
     ansible.builtin.dnf:
@@ -13,7 +17,7 @@
     ansible.builtin.service:
       name: mysqld
       state: started
-      enables: yes
+      enabled: yes
   
   - name: installed python mysql dependencies
     ansible.builtin.pip:
@@ -26,7 +30,7 @@
   - name: Check DB connections
     community.mysql.mysql_info: 
       login_user: root
-      login_passport: ExpenseApp@1
+      login_passport: "{{ mysql_root_password }}"
       login_host: "{{ login_host }}"
       filter: version
     ignore_errors: yes
@@ -36,3 +40,6 @@
     ansible.builtin.debug:
       msg: "Out: {{ mysql_connection_output }}."
 
+  - name: setup root password
+    ansible.builtin.command:  "mysql_secure_installation --set-root-pass {{ mysql_root_password }}"
+    when: mysql_connection_output.failed is Ture
