@@ -1,7 +1,8 @@
-- name: Configure DB Server
+-	name: Configure DB Server
   hosts: db
+	become: yes
   vars:
-    login_host:	database.akshaydaws-78s.online
+  	login_host:	database.akshaydaws-78s.online
 	vars_prompt: 		                                # Security of password
 	-	name: mysql_root_password
 		prompt: please enter the password
