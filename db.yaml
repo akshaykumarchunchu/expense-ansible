@@ -1,54 +1,45 @@
-- name: configure DB Server
+- name: configure DB server
   hosts: db
-	become: yes
+  become: yes
   vars:
-  	login_host:	database.akshaydaws-78s.online
-	vars_prompt: 		                                # Security of password
-	-	name: mysql_root_password
-		prompt: please enter the password
-		private: no 
-	tasks:
-	-	name: install Mysql-Server
-		ansible.builtin.dnf:
-			name:	mysql-server
-			state:	latest
-			
-	-	name: start and enable mysql-server
-		ansible.builtin.service:
-			name: mysqld
-			state: started
-			enabled: yes
+    login_host: db.daws78s.online
+  vars_prompt:
+  - name: mysql_root_password
+    prompt: please enter MySQL root password
+    private: no
+  tasks:
+  - name: Install MySQL Server
+    ansible.builtin.dnf:
+      name: mysql-server
+      state: latest
 
-	-	name: install python mysql denpendenices
-		ansible.builtin.pip:
-		  name:
-			-	Pymysql		                            # Python dependencies
-			-	cryptography	                        # To use password in command we need to install this cryptography
-			executable:	pip3.9	                    # Present ansible version on db server is python 3.9 to we need to use executable 3.9 only if its higher then higher version
- 
- 	#check the password is already setup or not, We are setting the connections
+  - name: Start and Enable MySQL server
+    ansible.builtin.service:
+      name: mysqld
+      state: started
+      enabled: yes
 
-	-	name: check DB connections
-		community.mysql.mysql_info:			          # We use community to check about db connections
-			login_user:	root			                  #
-			login_password:	"{{ mysql_root_password }}"
-			login_host:	"{{ login_host }}" 	        # to know which host we are connecting can keep this in variable for practice to us
-			filter:	version				                  # Version to check wheather is connection is running or not, If error means passwd is not set-up or else its good to go
-		ignore_errors:	yes				                # When we r running for 1st we get error so we enter ignore error and conutine
-		register:	mysql_connection_output		      # When your running a command or task that output needs to be taken in one variable that is register output
-	
-	-	name: print output
-		ansible.builtin.debug:
-			msg: "Output: {{mysql_connection_output}} " 
+  - name: install python mysql dependencies
+    ansible.builtin.pip:
+      name:
+      - PyMySQL
+      - cryptography
+      executable: pip3.9 # pip3.11 if python version is 3.11
 
-  #When your running first-time till the above command if you run, Will get a error in DB connections beacuse we haven't setup the password, So now we have to setup the password 
+  # check password is already setup or not
+  - name: check DB connection
+    community.mysql.mysql_info:
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      login_host: "{{ login_host }}"
+      filter: version
+    ignore_errors: yes
+    register: mysql_connection_output
 
-	-	name: setup root password
-		ansible.builtin.command: "mysql_secure_installation --set-root-pass {{ mysql_root_password }}" # Here without entering the password we can use it through prompt
-		when:	mysql_connections_output.failed is true	#boolen when should be given in {{ }}
+  - name: print output
+    ansible.builtin.debug:
+      msg: "Output: {{mysql_connection_output}} "
 
-			
-	# we run the root setup command when the DB connection command is failed because root setup password is not setup correctly
-		
-		
-
+  - name: setup root password
+    ansible.builtin.command: "mysql_secure_installation --set-root-pass {{ mysql_root_password }}"
+    when: mysql_connection_output.failed is true # don't give {{ }} in when condition
