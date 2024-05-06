@@ -2,9 +2,8 @@
   become: yes
   hosts: backend
   vars:
-    login_host: {{ backend.akshaydaws-78s.online }}
-    login_password: {{ mysql_root_password }}
-
+    login_host: database.akshaydaws-78s.online 
+    login_password: ExpenseApp@1
   tasks:
   - name: disable default nodejs
     ansible.builtin.command: dnf module disable nodejs -y
