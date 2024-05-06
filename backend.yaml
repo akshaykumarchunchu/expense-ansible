@@ -1,5 +1,5 @@
 - name: configure backend server
-  hosts: backend.akshaydaws-78s.online
+  hosts: backend
   become: yes
   vars:
 
