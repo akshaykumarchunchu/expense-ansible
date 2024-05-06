@@ -11,7 +11,7 @@
     ansible.builtin.command: dnf module enable nodejs:20 -y
 
   - name: install nodejs
-    ansible.builtin.dnf:
+    ansible.builtin.dnf: 
       name: nodejs
       state: installed
 
@@ -34,3 +34,8 @@
       src: /tmp/backend.zip #by defalut checks in ansible server
       dest: /app
       remote_src: yes
+
+  - name: install npm dependenices 
+    ansible.builtin.command: npm install
+    args:
+      chdir: /app
